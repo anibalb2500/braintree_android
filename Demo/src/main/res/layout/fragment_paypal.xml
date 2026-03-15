@@ -90,4 +90,12 @@
         android:layout_marginBottom="@dimen/margin_10"
         android:text="@string/paypal_single_time_pay_later" />
 
+    <Button
+        android:id="@+id/paypal_launch_again_bug_demo_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_10"
+        android:layout_marginBottom="@dimen/margin_10"
+        android:text="Launch again (reuse request) - BUG DEMO" />
+
 </LinearLayout>
