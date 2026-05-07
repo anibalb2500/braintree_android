@@ -2,11 +2,16 @@
 
 ## unreleased
 
-* GooglePay
-   * Add optional `DisplayItems` in GooglePay request
-
 * ShopperInsights
     * Add optional PayPal co-marketing campaign support (`PayPalCampaign` / `paypal_campaigns`) for Shopper Insights v2 customer session and recommendations APIs
+
+## 5.26.0 (2026-04-17)
+
+* GooglePay
+   * Add optional `DisplayItems` in GooglePay request
+   * Add support for `checkoutOption` to `GooglePayRequest` TransactionInfo params
+* BraintreeCore
+  * Fix crashes caused by uncaught exceptions in the configuration and analytics flows
     
 ## 5.25.0 (2026-03-31)
 

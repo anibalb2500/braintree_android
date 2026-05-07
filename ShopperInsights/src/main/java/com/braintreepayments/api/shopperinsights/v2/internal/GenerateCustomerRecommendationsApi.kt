@@ -8,6 +8,7 @@ import com.braintreepayments.api.shopperinsights.v2.PayPalCampaign
 import com.braintreepayments.api.shopperinsights.v2.PaymentOptions
 import org.json.JSONException
 import org.json.JSONObject
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * API to return customer recommendations using the `GenerateCustomerRecommendations` GraphQL mutation.
@@ -59,6 +60,7 @@ internal class GenerateCustomerRecommendationsApi(
                 val recommendationsResult = parseRecommendationsResponse(responseBody)
                 GenerateCustomerRecommendationsResult.Success(recommendationsResult)
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 GenerateCustomerRecommendationsResult.Error(e)
             }
         } catch (e: JSONException) {
