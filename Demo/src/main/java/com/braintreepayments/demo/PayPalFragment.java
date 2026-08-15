@@ -41,6 +41,9 @@ public class PayPalFragment extends BaseFragment {
 
     private DataCollector dataCollector;
 
+    // BUG DEMO: Reusing the same ReadyToLaunch for multiple app switches (do not do this in production).
+    private PayPalPaymentAuthRequest.ReadyToLaunch lastPayPalReadyToLaunch;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -127,6 +130,9 @@ public class PayPalFragment extends BaseFragment {
             );
             isPayLaterSelected = true;
         });
+
+        Button launchAgainBugDemoButton = view.findViewById(R.id.paypal_launch_again_bug_demo_button);
+        launchAgainBugDemoButton.setOnClickListener(v -> launchPayPalAgainWithSameRequest());
 
         payPalClient = new PayPalClient(
             requireContext(),
@@ -233,8 +239,9 @@ public class PayPalFragment extends BaseFragment {
                 if (paymentAuthRequest instanceof PayPalPaymentAuthRequest.Failure) {
                     handleError(((PayPalPaymentAuthRequest.Failure) paymentAuthRequest).getError());
                 } else if (paymentAuthRequest instanceof PayPalPaymentAuthRequest.ReadyToLaunch){
-                    PayPalPendingRequest request = payPalLauncher.launch(requireActivity(),
-                            ((PayPalPaymentAuthRequest.ReadyToLaunch) paymentAuthRequest));
+                    PayPalPaymentAuthRequest.ReadyToLaunch readyToLaunch = (PayPalPaymentAuthRequest.ReadyToLaunch) paymentAuthRequest;
+                    lastPayPalReadyToLaunch = readyToLaunch;
+                    PayPalPendingRequest request = payPalLauncher.launch(requireActivity(), readyToLaunch);
                     if (request instanceof PayPalPendingRequest.Started) {
                         storePendingRequest((PayPalPendingRequest.Started) request);
                     } else if (request instanceof PayPalPendingRequest.Failure) {
@@ -242,6 +249,23 @@ public class PayPalFragment extends BaseFragment {
                     }
                 }
             });
+    }
+
+    /**
+     * BUG DEMO: Launches app switch again using the same ReadyToLaunch (same context_id).
+     * Do not do this in production — each app switch must use a fresh createPaymentAuthRequest().
+     */
+    private void launchPayPalAgainWithSameRequest() {
+        if (lastPayPalReadyToLaunch == null) {
+            showDialog("Tap a PayPal button first to get a request");
+            return;
+        }
+        PayPalPendingRequest request = payPalLauncher.launch(requireActivity(), lastPayPalReadyToLaunch);
+        if (request instanceof PayPalPendingRequest.Started) {
+            storePendingRequest((PayPalPendingRequest.Started) request);
+        } else if (request instanceof PayPalPendingRequest.Failure) {
+            handleError(((PayPalPendingRequest.Failure) request).getError());
+        }
     }
 
     private void completePayPalFlow(PayPalPaymentAuthResult.Success paymentAuthResult) {
